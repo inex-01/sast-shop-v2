@@ -17,7 +17,7 @@ func main() {
 	config.Init()
 	logger.Init(constant.ErrandServiceName)
 	postgres.Init()
-	redis.Init()
+	redis.Init(constant.ErrandServiceName)
 	e := echo.New()
 	v1.Init(e)
 	if err := e.Start(fmt.Sprintf(":%d", config.AppConfig.ErrandServicePort)); err != nil {

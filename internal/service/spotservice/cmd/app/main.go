@@ -17,7 +17,7 @@ func main() {
 	config.Init()
 	logger.Init(constant.SpotServiceName)
 	postgres.Init()
-	redis.Init()
+	redis.Init(constant.SpotServiceName)
 	e := echo.New()
 	v1.Init(e)
 	if err := e.Start(fmt.Sprintf(":%d", config.AppConfig.SpotServicePort)); err != nil {

@@ -3,6 +3,7 @@ package constant
 import "time"
 
 const (
+	ProjectName        = "sast-shop-v2"
 	Dev                = "development"
 	Test               = "test"
 	Prod               = "production"

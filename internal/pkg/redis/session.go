@@ -16,6 +16,7 @@ func NewSessionStore() *SessionStore {
 }
 
 func (s *SessionStore) GetSession(ctx context.Context, token string) (*rpcinterceptor.AuthUser, error) {
+	ctx = WithProjectPrefixOnly(ctx)
 	data, err := Client.Get(ctx, constant.SessionTokenPrefix+token).Bytes()
 	if err != nil {
 		return nil, err
@@ -28,6 +29,7 @@ func (s *SessionStore) GetSession(ctx context.Context, token string) (*rpcinterc
 }
 
 func (s *SessionStore) GetUserByID(ctx context.Context, userID int64) (*rpcinterceptor.AuthUser, error) {
+	ctx = WithProjectPrefixOnly(ctx)
 	data, err := Client.Get(ctx, fmt.Sprintf("%s%d", constant.UserCachePrefix, userID)).Bytes()
 	if err != nil {
 		return nil, err
@@ -45,5 +47,6 @@ func (s *SessionStore) SaveSession(ctx context.Context, token string, user *rpci
 	if err != nil {
 		return err
 	}
+	ctx = WithProjectPrefixOnly(ctx)
 	return Client.Set(ctx, constant.SessionTokenPrefix+token, data, constant.SessionTTL).Err()
 }

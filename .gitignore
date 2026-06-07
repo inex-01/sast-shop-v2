@@ -33,3 +33,6 @@ go.work.sum
 
 # Buf generated files
 gen
+
+# Go debug programs
+__debug_bin*

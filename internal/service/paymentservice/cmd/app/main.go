@@ -18,7 +18,7 @@ func main() {
 	config.Init()
 	logger.Init(constant.PaymentServiceName)
 	postgres.Init()
-	redis.Init()
+	redis.Init(constant.PaymentServiceName)
 	client.InitUserServiceClient()
 	e := echo.New()
 	v1.Init(e)
