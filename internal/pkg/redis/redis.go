@@ -52,9 +52,9 @@ func (h *prefixHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 			prefix = h.fullPrefix() + ":"
 		}
 		args := cmd.Args()
-		if len(args) > 0 {
-			if key, ok := args[0].(string); ok && !strings.HasPrefix(key, h.fullPrefix()) {
-				args[0] = prefix + key
+		if len(args) > 1 {
+			if key, ok := args[1].(string); ok && !strings.HasPrefix(key, h.fullPrefix()) {
+				args[1] = prefix + key
 			}
 		}
 		return next(ctx, cmd)
@@ -72,9 +72,9 @@ func (h *prefixHook) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.P
 
 		for _, cmd := range cmds {
 			args := cmd.Args()
-			if len(args) > 0 {
-				if key, ok := args[0].(string); ok && !strings.HasPrefix(key, h.fullPrefix()) {
-					args[0] = prefix + key
+			if len(args) > 1 {
+				if key, ok := args[1].(string); ok && !strings.HasPrefix(key, h.fullPrefix()) {
+					args[1] = prefix + key
 				}
 			}
 		}
