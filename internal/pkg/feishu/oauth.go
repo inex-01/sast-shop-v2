@@ -3,63 +3,12 @@ package feishu
 import (
 	"context"
 	"fmt"
-	"net/url"
 
-	"github.com/NJUPT-SAST/sast-shop-v2/internal/pkg/constant"
 	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	larkaccesstoken "github.com/larksuite/oapi-sdk-go/v3/core/accesstoken"
 	"github.com/larksuite/oapi-sdk-go/v3/core/accesstoken/authorizationcode"
 	"github.com/larksuite/oapi-sdk-go/v3/core/accesstoken/refreshtoken"
 )
-
-type acquireAuthorizationCodeRequest struct {
-	ClientID            string `json:"client_id"`
-	ResponseType        string `json:"response_type"`
-	RedirectURI         string `json:"redirect_uri,omitempty"`
-	State               string `json:"state"`
-	CodeChallenge       string `json:"code_challenge,omitempty"`
-	CodeChallengeMethod string `json:"code_challenge_method,omitempty"`
-}
-
-func BuildAuthorizationURL(req acquireAuthorizationCodeRequest) (string, error) {
-	if AppClient == nil {
-		return "", fmt.Errorf("feishu client is not initialized")
-	}
-
-	if req.ClientID == "" {
-		req.ClientID = AppClient.AppID
-	}
-	if req.ResponseType == "" {
-		req.ResponseType = "code"
-	}
-	if req.RedirectURI == "" {
-		req.RedirectURI = AppClient.RedirectURL
-	}
-
-	u, err := url.Parse(fmt.Sprintf("%s/open-apis/authen/v1/authorize", constant.FeishuAccountBaseURL))
-	if err != nil {
-		return "", err
-	}
-
-	query := u.Query()
-	query.Set("client_id", req.ClientID)
-	query.Set("response_type", req.ResponseType)
-	if req.RedirectURI != "" {
-		query.Set("redirect_uri", req.RedirectURI)
-	}
-	if req.State != "" {
-		query.Set("state", req.State)
-	}
-	if req.CodeChallenge != "" {
-		query.Set("code_challenge", req.CodeChallenge)
-	}
-	if req.CodeChallengeMethod != "" {
-		query.Set("code_challenge_method", req.CodeChallengeMethod)
-	}
-	u.RawQuery = query.Encode()
-
-	return u.String(), nil
-}
 
 func ExchangeCode(ctx context.Context, code string, codeVerifier string, redirectURI string) (*OAuthToken, error) {
 	client, err := getClient()
