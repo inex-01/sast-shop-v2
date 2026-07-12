@@ -30,7 +30,7 @@ func OnErrandTaskPaymentConfirmed(ctx context.Context, taskID, payerID int64) er
 		return errandInternalError()
 	}
 
-	//已经completed的不变
+	// 已经completed的不变
 	if task.Status == model.ErrandTaskStatusCompleted {
 		log.Debug().Int64("task_id", taskID).Msg("task already completed, skip OnPaymentConfirmed")
 		return nil
