@@ -6,6 +6,7 @@ import (
 
 	"github.com/NJUPT-SAST/sast-shop-v2/internal/pkg/bun/postgres"
 	"github.com/NJUPT-SAST/sast-shop-v2/internal/services/errandservice/internal/model"
+	"github.com/uptrace/bun"
 )
 
 // CreateDemand 插入一条 errand_demand，返回自增 ID。
@@ -137,4 +138,76 @@ func GetDemandByID(ctx context.Context, demandID int64) (*model.ErrandDemand, er
 		Where("id = ?", demandID).
 		Scan(ctx)
 	return &demand, err
+}
+
+// GetDemandsByRequester 分页查询某买家的跑腿需求列表。
+// storeID 和 status 为可选过滤条件，传 nil 表示不过滤。
+func GetDemandsByRequester(
+	ctx context.Context,
+	requesterID int64,
+	storeID *int64,
+	status *model.ErrandDemandStatus,
+	page, pageSize int32,
+) ([]*model.ErrandDemand, int, error) {
+	query := postgres.DB.NewSelect().
+		Model((*model.ErrandDemand)(nil)).
+		Where("requester_id = ?", requesterID).
+		Order("created_at DESC")
+
+	if storeID != nil {
+		query.Where("store_id = ?", *storeID)
+	}
+	if status != nil {
+		query.Where("status = ?", *status)
+	}
+
+	totalCount, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	var demands []*model.ErrandDemand
+	err = query.
+		Limit(int(pageSize)).
+		Offset(int(offset)).
+		Scan(ctx, &demands)
+	return demands, totalCount, err
+}
+
+// GetDemandItemsByDemandIDs 批量查询指定 demand 下的所有 demand_item。
+func GetDemandItemsByDemandIDs(ctx context.Context, demandIDs []int64) ([]*model.ErrandDemandItem, error) {
+	if len(demandIDs) == 0 {
+		return nil, nil
+	}
+	var items []*model.ErrandDemandItem
+	err := postgres.DB.NewSelect().
+		Model(&items).
+		Where("errand_demand_id IN (?)", bun.In(demandIDs)).
+		Order("product_template_id ASC").
+		Scan(ctx)
+	return items, err
+}
+
+// GetAssignmentsByDemandItemIDs 根据 demand_item_id 批量查询 assignment。
+func GetAssignmentsByDemandItemIDs(ctx context.Context, demandItemIDs []int64) ([]*model.ErrandTaskAssignment, error) {
+	if len(demandItemIDs) == 0 {
+		return nil, nil
+	}
+	var assignments []*model.ErrandTaskAssignment
+	err := postgres.DB.NewSelect().
+		Model(&assignments).
+		Where("demand_item_id IN (?)", bun.In(demandItemIDs)).
+		Scan(ctx)
+	return assignments, err
+}
+
+// GetTaskItemsByTaskID 查询某 task 下所有 task_item。
+func GetTaskItemsByTaskID(ctx context.Context, taskID int64) ([]*model.ErrandTaskItem, error) {
+	var items []*model.ErrandTaskItem
+	err := postgres.DB.NewSelect().
+		Model(&items).
+		Where("task_id = ?", taskID).
+		Scan(ctx)
+	return items, err
 }
