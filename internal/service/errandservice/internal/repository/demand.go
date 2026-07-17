@@ -9,8 +9,6 @@ import (
 	"github.com/uptrace/bun"
 )
 
-// CreateDemand 插入一条 errand_demand，返回自增 ID。
-// service 层负责填充 RequesterID、StoreID、Deadline。
 func CreateDemand(ctx context.Context, demand *model.ErrandDemand) (int64, error) {
 	demand.Status = model.ErrandDemandStatusOpen
 	demand.CreatedAt = time.Now()
@@ -25,9 +23,6 @@ func CreateDemand(ctx context.Context, demand *model.ErrandDemand) (int64, error
 	return demand.ID, nil
 }
 
-// BatchCreateDemandItems 批量插入 errand_demand_item。
-// service 层负责填充 ErrandDemandID、RequesterID、StoreID、ProductTemplateID、
-// Quantity、ServiceFeePerUnitCents、EstimatedUnitPriceCents。
 func BatchCreateDemandItems(ctx context.Context, items []*model.ErrandDemandItem) error {
 	if len(items) == 0 {
 		return nil
@@ -46,7 +41,6 @@ func BatchCreateDemandItems(ctx context.Context, items []*model.ErrandDemandItem
 	return err
 }
 
-// DemandListAggregation 按店铺聚合的需求统计信息。
 type DemandListAggregation struct {
 	StoreID                   int64     `bun:"store_id"`
 	TotalOriginUnitPriceCents int32     `bun:"total_origin_unit_price_cents"`
@@ -54,7 +48,6 @@ type DemandListAggregation struct {
 	LatestUpdatedAt           time.Time `bun:"latest_updated_at"`
 }
 
-// GetDemandListByStore 按店铺聚合查询 open 状态的需求统计。
 func GetDemandListByStore(
 	ctx context.Context,
 	page, pageSize int32,
@@ -85,7 +78,6 @@ func GetDemandListByStore(
 	return results, totalCount, err
 }
 
-// GetDistinctRequestersByStore 查询某店铺下参与的买家 ID（去重）。
 func GetDistinctRequestersByStore(
 	ctx context.Context,
 	storeID int64,
@@ -102,7 +94,6 @@ func GetDistinctRequestersByStore(
 	return requesterIDs, err
 }
 
-// GetOpenDemandItemsByStore 查询某店铺下所有 open 状态的 demand_item。
 func GetOpenDemandItemsByStore(
 	ctx context.Context,
 	storeID int64,
@@ -117,7 +108,6 @@ func GetOpenDemandItemsByStore(
 	return items, err
 }
 
-// GetDemandByID 根据 ID 查询单条 errand_demand。
 func GetDemandByID(ctx context.Context, demandID int64) (*model.ErrandDemand, error) {
 	var demand model.ErrandDemand
 	err := postgres.DB.NewSelect().
@@ -127,7 +117,6 @@ func GetDemandByID(ctx context.Context, demandID int64) (*model.ErrandDemand, er
 	return &demand, err
 }
 
-// GetDemandsByRequester 分页查询某买家的跑腿需求列表。
 func GetDemandsByRequester(
 	ctx context.Context,
 	requesterID int64,
@@ -161,7 +150,6 @@ func GetDemandsByRequester(
 	return demands, totalCount, err
 }
 
-// GetDemandItemsByDemandIDs 批量查询指定 demand 下的所有 demand_item。
 func GetDemandItemsByDemandIDs(ctx context.Context, demandIDs []int64) ([]*model.ErrandDemandItem, error) {
 	if len(demandIDs) == 0 {
 		return nil, nil
@@ -175,7 +163,6 @@ func GetDemandItemsByDemandIDs(ctx context.Context, demandIDs []int64) ([]*model
 	return items, err
 }
 
-// GetAssignmentsByDemandItemIDs 根据 demand_item_id 批量查询 assignment。
 func GetAssignmentsByDemandItemIDs(ctx context.Context, demandItemIDs []int64) ([]*model.ErrandTaskAssignment, error) {
 	if len(demandItemIDs) == 0 {
 		return nil, nil
@@ -188,7 +175,6 @@ func GetAssignmentsByDemandItemIDs(ctx context.Context, demandItemIDs []int64) (
 	return assignments, err
 }
 
-// GetTaskItemsByTaskID 查询某 task 下所有 task_item。
 func GetTaskItemsByTaskID(ctx context.Context, taskID int64) ([]*model.ErrandTaskItem, error) {
 	var items []*model.ErrandTaskItem
 	err := postgres.DB.NewSelect().
